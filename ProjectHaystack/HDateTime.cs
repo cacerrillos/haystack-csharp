@@ -33,7 +33,14 @@ namespace ProjectHaystack
 
         public HTime time { get; }
 
-        public TimeSpan Offset { get { return m_dtoParsed.Offset; } }
+        public TimeSpan Offset {
+          get {
+            var tz = TimeZone.dntz;
+            var utcOffset = new DateTimeOffset(m_dtoParsed.UtcDateTime, TimeSpan.Zero);
+            var offset = utcOffset.ToOffset(tz.GetUtcOffset(utcOffset));
+            return offset.Offset;
+          }
+        }
 
         public HTimeZone TimeZone { get; }
 
@@ -44,7 +51,7 @@ namespace ProjectHaystack
             get
             {
                 // Get a copy of the DTO
-                DateTimeOffset dtoRet = new DateTimeOffset(m_dtoParsed.DateTime, m_dtoParsed.Offset);
+                DateTimeOffset dtoRet = new DateTimeOffset(m_dtoParsed.DateTime, Offset);
                 return dtoRet;
             }
         }
@@ -436,7 +443,7 @@ namespace ProjectHaystack
             if (!(obj is HDateTime)) return false;
             HDateTime x = (HDateTime)obj;
             return (date.hequals(x.date) && time.hequals(x.time) &&
-                   m_dtoParsed.Offset == x.Offset && TimeZone.hequals(x.TimeZone));
+                   Offset == x.Offset && TimeZone.hequals(x.TimeZone));
         }
 
         public override string ToString()
@@ -448,11 +455,12 @@ namespace ProjectHaystack
                 strRet += "Z UTC";
                 return strRet;
             }
-            else if (m_dtoParsed.Offset.Hours > 0) // Add the "+" sign if positive
+            else if (Offset.Hours > 0) // Add the "+" sign if positive
                 strRet += "+";
             else
                 strRet += "-";
-            strRet += m_dtoParsed.Offset.ToString(@"hh\:mm");
+
+            strRet += Offset.ToString(@"hh\:mm");
             strRet += " ";
             strRet += TimeZone.ToString();
             return strRet;
