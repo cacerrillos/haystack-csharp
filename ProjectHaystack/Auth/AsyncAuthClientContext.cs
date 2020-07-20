@@ -41,7 +41,7 @@ namespace ProjectHaystack.Auth
     ///   URI used to Open the connection
     /// </summary>
     public string uri { get { return Uri.AbsoluteUri; } }
-    public Uri Uri { get; private set; }
+    public Uri Uri { get; set; }
 
     /// <summary>
     ///   Username used to Open the connection
